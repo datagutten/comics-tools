@@ -1,0 +1,36 @@
+language: php
+
+matrix:
+  fast_finish: true
+  include:
+    - php: '7.3'
+    - php: '7.4'
+    - php: 'nightly'
+      install:
+        - composer install --no-interaction --ignore-platform-reqs
+  allow_failures:
+    - php: 'nightly'
+
+services:
+ - mysql
+
+addons:
+ apt:
+  packages:
+   - php-mysql
+   - php-curl
+
+before_install:
+ - mysql -e 'GRANT ALL PRIVILEGES ON `comicmanager_test`.* TO "php_test"@"localhost" IDENTIFIED BY "password";'
+
+install:
+  - composer install --no-interaction
+
+before_script:
+ - vendor/bin/phpunit --version
+
+script:
+ - vendor/bin/phpunit
+
+after_script:
+  - bash <(curl -s https://codecov.io/bash)
