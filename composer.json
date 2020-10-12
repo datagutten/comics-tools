@@ -3,7 +3,10 @@
     "description": "Tools for the web comics aggregator by jodal (jodal/comics)",
     "type": "library",
     "require": {
-        "rmccue/requests": "^1.7"
+        "php": ">=7.1",
+        "rmccue/requests": "^1.7",
+        "datagutten/tools": "^1.9.1",
+        "ext-pdo": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.4"
@@ -14,5 +17,11 @@
             "name": "datagutten",
             "email": "datagutten@datagutten.net"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-4": {
+            "datagutten\\comics_tools\\comics_api_client\\":  "comics_api_client",
+            "datagutten\\comics_tools\\tests\\":  "tests"
+        }
+    }
 }
