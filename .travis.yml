@@ -16,6 +16,10 @@ matrix:
   allow_failures:
     - php: 'nightly'
 
+env:
+  global:
+    - XDEBUG_MODE=coverage
+
 services:
  - mysql
 
