@@ -1,4 +1,5 @@
 Thumbs.db
-*config.php
+config.php
+comicmail.config.php
 
 /vendor/
