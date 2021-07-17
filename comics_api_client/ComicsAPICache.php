@@ -39,10 +39,10 @@ class ComicsAPICache extends ComicsAPI
         $this->st_lookup_checksum = $this->db->prepare('SELECT * FROM comics_api_cache WHERE site=? AND comic=? AND checksum=?');
     }
 
-    function create_table()
+    public static function create_table(PDO $db)
     {
-        $q = file_get_contents('create_cache_table.sql');
-        $this->db->query($q);
+        $q = file_get_contents(__DIR__.'/create_cache_table.sql');
+        $db->query($q);
     }
 
     /**
