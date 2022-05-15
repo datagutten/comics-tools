@@ -4,7 +4,7 @@
     "type": "library",
     "require": {
         "php": ">=7.1",
-        "rmccue/requests": "^1.7",
+        "rmccue/requests": "^2.0",
         "datagutten/tools": "^1.9.1",
         "ext-pdo": "*"
     },

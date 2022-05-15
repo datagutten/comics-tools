@@ -8,8 +8,7 @@ use datagutten\comics_tools\comics_api_client\exceptions;
 use DateInterval;
 use DateTime;
 use InvalidArgumentException;
-use Requests_Exception;
-use Requests_Session;
+use WpOrg\Requests;
 
 class ComicsAPI
 {
@@ -41,7 +40,7 @@ class ComicsAPI
             'Authorization' => 'Key ' . $config['secret_key']
         ];
 
-        $this->session = new Requests_Session($config['site_url'] . '/api/v1/', $headers, ['key' => $config['secret_key']], ['timeout'=>30]); // , ['proxy'=>'127.0.0.1:8888']
+        $this->session = new Requests\Session($config['site_url'] . '/api/v1/', $headers, ['key' => $config['secret_key']], ['timeout'=>30]); // , ['proxy'=>'127.0.0.1:8888']
     }
 
     /**
@@ -58,7 +57,7 @@ class ComicsAPI
             $response = $this->session->get($uri);
         }
             /** @noinspection PhpRedundantCatchClauseInspection */
-        catch (Requests_Exception $e)
+        catch (Requests\Exception $e)
         {
             throw new exceptions\ComicsException('Request error', 0, $e);
         }
