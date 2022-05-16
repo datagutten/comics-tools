@@ -1,26 +1,57 @@
 <?Php
 //A tool to export comics to files and folders based on date and eventually delete from the database
-$comic='gele';
-$comicspath='/home/comics';
-$outfolder='/home/exportedcomics';
+use datagutten\comics_tools\comics_api_client\ComicsAPI;
+use datagutten\comics_tools\comics_api_client\exceptions\ComicsException;
+use datagutten\tools\files\files;
 
-$sql="SELECT *,comics_release.id AS releaseid,comics_image.id AS imageid FROM comics_release,comics_image,comics_comic WHERE comics_release.id=comics_image.id AND comics_comic.id=comics_release.comic_id AND slug='$comic'";
-require 'config.php';
-$result=$db->query($sql);
-$rows=$result->fetchall(PDO::FETCH_ASSOC);
-//print_r($rows);
-foreach ($rows as $issue)
+require 'vendor/autoload.php';
+$config = require 'config.php';
+try
 {
-	
-	$datefolder=str_replace('-','',substr($issue['pub_date'],0,7));
-	$folder=$outfolder."/mnt/tegneserier/$comic/$datefolder/";
-	if(!file_exists($folder))
-		mkdir($folder,0777,true);
-	echo $folder.$issue['pub_date']."\n";
-	copy($comicspath.'/media/'.$issue['file'],$folder.str_replace('-','',$issue['pub_date']).'.jpg');
-	
-	//echo "DELETE FROM comics_release_images WHERE release_id={$issue['releaseid']};\n";
-	//echo "DELETE FROM comics_image WHERE id={$issue['imageid']};\n";
-	//echo "DELETE FROM comics_release WHERE id={$issue['releaseid']};\n";
-	
+    $comics = new ComicsAPI($config);
+}
+catch (ComicsException $e)
+{
+    die($e->getMessage() . "\n");
+}
+
+if (empty($argv[1]))
+    die("Usage: php exportcomics.php [comic slug] [year]");
+
+$slug = $argv[1];
+$export_folder = 'comics_export';
+
+$releases = $comics->releases_year($slug, $argv[2]);
+
+foreach ($releases as $release)
+{
+    $pub_date = new DateTime($release['pub_date']);
+    $folder = files::path_join($export_folder, $slug, $pub_date->format('Ym'));
+    if (!file_exists($folder))
+        mkdir($folder, 0777, true);
+
+    $multi_image = count($release['images']) > 1;
+    foreach ($release['images'] as $key => $image)
+    {
+        $extension = pathinfo($image['file'], PATHINFO_EXTENSION);
+        if (!$multi_image)
+            $name = $pub_date->format('Ymd');
+        else
+            $name = sprintf('%s-%d', $pub_date->format('Ymd'), $key);
+
+        if (!empty($image['title']))
+            file_put_contents(files::path_join($folder, $name . '.txt'), $image['title']);
+        if (!empty($image['text']))
+            file_put_contents(files::path_join($folder, $name . ' text.txt'), $image['text']);
+
+        $image_file = files::path_join($folder, $name . '.' . $extension);
+        if (!file_exists($image_file))
+        {
+            $response = $comics->session->get($image['file'], [], ['filename' => $image_file]);
+            if (!$response->success)
+                printf("Failed to download %s\n", $image['file']);
+            else
+                printf("Saved %s %s\n", $slug, $release['pub_date']);
+        }
+    }
 }
