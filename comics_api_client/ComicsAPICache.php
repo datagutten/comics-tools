@@ -62,6 +62,8 @@ class ComicsAPICache extends ComicsAPI
         if ($this->st_select->rowCount() == 0)
         {
             $release = parent::releases_date($slug, $date)[0];
+            if(empty($release['images']))
+                throw new exceptions\ComicsException('No image found');
             $image = $release['images'][0];
             try
             {
