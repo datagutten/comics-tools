@@ -71,9 +71,22 @@ class ComicsAPI
                 throw new exceptions\HTTPError('HTTP error ' . $response->status_code, $response);
         }
         $data = json_decode($response->body, true);
-        if ($data['meta']['total_count'] == 0)
+        if (!isset($data['meta']) && !empty($data))
+            return $data;
+        elseif ($data['meta']['total_count'] > 0)
+            return $data['objects'];
+        else
             throw new exceptions\NoResultsException($uri, $response);
-        return $data['objects'];
+    }
+
+    function releases_checksum($checksum)
+    {
+        $releases = $this->request("releases/?images__checksum=$checksum");
+        foreach ($releases as $key=>$release)
+        {
+            $releases[$key]['comic'] = $this->request($release['comic']);
+        }
+        return $releases;
     }
 
     /**

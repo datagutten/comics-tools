@@ -34,6 +34,12 @@ class comics_apiTest extends TestCase
         $this->comics->releases_year('pondus', '2020');
     }
 
+    public function testImagesFromChecksum()
+    {
+        $images = $this->comics->releases_checksum('cdc5601cbe8514f6764c4948055886f38745abc7eefdc9727e2bcb861e3971bb');
+        $this->assertNotEmpty($images);
+    }
+
     public function testRelease_single()
     {
         $url = $this->comics->release_single('pondusbt', '2020-10-02');
