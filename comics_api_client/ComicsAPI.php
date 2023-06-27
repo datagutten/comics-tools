@@ -79,10 +79,18 @@ class ComicsAPI
             throw new exceptions\NoResultsException($uri, $response);
     }
 
-    function releases_checksum($checksum)
+    /**
+     * Lookup releases by image checksum
+     * @param string $checksum Image checksum
+     * @return array Releases
+     * @throws exceptions\HTTPError HTTP error
+     * @throws exceptions\NoResultsException No results returned
+     * @throws exceptions\ComicsException Request error
+     */
+    function releases_checksum(string $checksum): array
     {
         $releases = $this->request("releases/?images__checksum=$checksum");
-        foreach ($releases as $key=>$release)
+        foreach ($releases as $key => $release)
         {
             $releases[$key]['comic'] = $this->request($release['comic']);
         }
