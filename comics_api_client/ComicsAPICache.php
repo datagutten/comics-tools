@@ -46,6 +46,18 @@ class ComicsAPICache extends ComicsAPI
     }
 
     /**
+     * Add an image to the cache
+     * @param string $slug Comic slug
+     * @param string $pub_date Release publication date
+     * @param array $image Image info
+     * @return void
+     */
+    protected function cache_add(string $slug, string $pub_date, array $image)
+    {
+        $this->st_insert->execute([$this->site_hostname, $slug, $pub_date, $image['file'], $image['checksum'], $image['fetched']]);
+    }
+
+    /**
      * @param string $slug
      * @param string $date
      * @return array Release information
