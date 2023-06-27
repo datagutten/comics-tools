@@ -82,13 +82,37 @@ class ComicsAPICache extends ComicsAPI
     }
 
     /**
-     * @param string $comic Comic slug
+     * @param string $slug Comic slug
      * @param string $checksum Image checksum
-     * @return mixed
+     * @return array
+     * @throws exceptions\HTTPError HTTP error
+     * @throws exceptions\NoResultsException No releases found
+     * @throws exceptions\ComicsException Request error
      */
-    function lookup_checksum($comic, $checksum)
+    public function lookup_checksum(string $slug, string $checksum): array
     {
-        $this->st_lookup_checksum->execute([$this->site_hostname, $comic, $checksum]);
-        return $this->st_lookup_checksum->fetch(PDO::FETCH_ASSOC);
+        $this->st_lookup_checksum->execute([$this->site_hostname, $slug, $checksum]);
+        $releases_db = $this->st_lookup_checksum->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!empty($releases_db))
+            return $releases_db;
+        else
+        {
+            $images = [];
+            foreach ($this->releases_checksum($checksum) as $release)
+            {
+                foreach ($release['images'] as $image)
+                {
+                    $this->cache_add($release['comic']['slug'], $release['pub_date'], $image);
+                    if ($release['comic']['slug'] == $slug)
+                        $images[] = $image + [
+                                'slug' => $slug,
+                                'comic' => $slug,
+                                'pub_date' => $release['pub_date'],
+                            ];
+                }
+            }
+            return $images;
+        }
     }
 }
